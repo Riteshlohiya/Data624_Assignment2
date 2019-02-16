@@ -1,0 +1,138 @@
+---
+title: "Data624_Assignment2"
+author: "Ritesh Lohiya"
+date: "February 14, 2019"
+output: html_document
+---
+
+#Data624 The forecaster's toolbox Assignment2
+
+#Chapter 3:
+
+```{r}
+suppressMessages(suppressWarnings(library(fpp2)))
+suppressMessages(suppressWarnings(library(readxl)))
+```
+
+#3.1 For the following series, find an appropriate Box-Cox transformation in order to stabilise the variance.
+
+#usnetelec:
+
+```{r}
+lmd = BoxCox.lambda(usnetelec)
+lmd  
+usnetelec.trans = BoxCox(usnetelec,lmd)
+combined = cbind(usnetelec,usnetelec.trans)
+autoplot(combined,facet=T) + xlab("Year") + ggtitle("usnetelec")
+```
+
+#usgdp:
+
+```{r}
+lmd = BoxCox.lambda(usgdp)
+lmd  
+usgdp.trans = BoxCox(usgdp,lmd)
+combined = cbind(usgdp,usgdp.trans)
+autoplot(combined,facet=T) + xlab("Year") + ggtitle("usgdp")
+```
+
+#mcopper:
+
+```{r}
+lmd = BoxCox.lambda(mcopper)
+lmd  
+mcopper.trans = BoxCox(mcopper,lmd)
+combined = cbind(mcopper,mcopper.trans)
+autoplot(combined,facet=T) + xlab("Year") + ggtitle("mcopper")
+```
+
+#enplanements:
+
+```{r}
+lmd = BoxCox.lambda(enplanements)
+lmd  
+enplanements.trans = BoxCox(enplanements,lmd)
+combined = cbind(enplanements,enplanements.trans)
+autoplot(combined,facet=T) + xlab("Year") + ggtitle("enplanements")
+```
+
+#3.2 Why is a Box-Cox transformation unhelpful for the cangas data?
+
+#To answer this lets first autoplot the cangas data.
+
+#cangas:
+
+```{r}
+lmd = BoxCox.lambda(cangas)
+lmd  
+cangas.trans = BoxCox(cangas,lmd)
+combined = cbind(cangas,cangas.trans)
+autoplot(combined,facet=T) + xlab("Year") + ggtitle("cangas")
+```
+
+#This time series is monthly Canadian gas production, in billions of cubic metres, January 1960 - February 2005. There is not much variations in the plots. So transformation is not always needed. 
+
+
+#3.3 What Box-Cox transformation would you select for your retail data (from Exercise 3 in Section 2.10)?
+
+Retails data:
+
+```{r}
+retaildata <- readxl::read_excel("C:/Users/rites/Documents/GitHub/Data624_Assignment1/retail.xlsx", skip=1)
+myts <- ts(retaildata[,"A3349873A"],frequency=12, start=c(1982,4))
+```
+
+```{r}
+lmd = BoxCox.lambda(myts)
+lmd  
+myts.trans = BoxCox(myts,lmd)
+combined = cbind(myts,myts.trans)
+autoplot(combined,facet=T) + xlab("Year") + ggtitle("myts")
+```
+
+#It would be good to choose Box-Cox Transformation with lambda = 0.1276369
+
+
+#3.8 For your retail time series (from Exercise 3 in Section 2.10):
+
+#a. Split the data into two parts using
+
+```{r}
+myts.train <- window(myts, end=c(2010,12))
+myts.test <- window(myts, start=2011)
+```
+
+#b. Check that your data have been split appropriately by producing the following plot.
+
+```{r}
+autoplot(myts) +
+autolayer(myts.train, series="Training") +
+autolayer(myts.test, series="Test")
+```
+
+#c. Calculate forecasts using snaive applied to myts.train.
+
+```{r}
+fc <- snaive(myts.train)
+```
+
+#d. Compare the accuracy of your forecasts against the actual values stored in myts.test.
+
+```{r}
+accuracy(fc,myts.test)
+```
+
+#e. Check the residuals.
+
+```{r}
+checkresiduals(fc)
+```
+
+#Do the residuals appear to be uncorrelated and normally distributed?
+
+#Residuals are correlated with each other and not normally distributed
+
+#f. How sensitive are the accuracy measures to the training/test split?
+
+#Sensitivity is the ratio of the test set error to the train set error. Looking at the accuracy results, i feel accuracy measures are very sensitive to training/test split.
+
